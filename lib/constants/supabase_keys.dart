@@ -1,0 +1,3 @@
+// lib/constants/supabase_keys.dart
+const String supabaseUrl = 'https://rxqyulxekriaqkfwumpn.supabase.co';
+const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4cXl1bHhla3JpYXFrZnd1bXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1MDI3NDAsImV4cCI6MjA3ODA3ODc0MH0.Tfbni3cr5DAmbOY9LaXzy43FDLBhAOauSqWcSZOARa8';
