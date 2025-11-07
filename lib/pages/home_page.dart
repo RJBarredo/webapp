@@ -135,7 +135,7 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
                   StudyCard(
-                    'Plan your days ahead',
+                    'Plan your days ahea',
                     'Schedule your subjects, study time, and exams',
                     icon: Icons.calendar_month,
                     onTap: () {
