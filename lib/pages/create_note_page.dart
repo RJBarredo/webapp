@@ -81,11 +81,13 @@ class _NotesCreatorPageState extends State<NotesCreatorPage> {
       _titleController.clear();
       _contentController.clear();
     } catch (e) {
+      print("Supabase error: $e");  // <--- This will print the full error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error saving note: $e')),
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -3,10 +3,9 @@ import '../widgets/study_card.dart';
 import '../widgets/responsive_grid.dart';
 import '../widgets/section_title.dart';
 import '../services/supabase_service.dart';
-import 'package:webapp/pages/create_note_page.dart';
-import 'package:webapp/pages/create_flashcard_page.dart';
-import 'package:webapp/pages/planner_page.dart';
-
+import 'create_note_page.dart';
+import 'create_flashcard_page.dart';
+import 'planner_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -39,6 +38,57 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _showAddSubjectDialog() async {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController descriptionController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Add Subject"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: "Subject Name"),
+              ),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: "Description"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (nameController.text.trim().isEmpty) return;
+
+                try {
+                  await _supabase.addSubject(
+                    nameController.text.trim(),
+                    descriptionController.text.trim(),
+                  );
+
+                  Navigator.pop(context);
+                  _loadSubjects(); // refresh UI
+                } catch (e) {
+                  debugPrint("Error adding subject: $e");
+                }
+              },
+              child: const Text("Add"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -65,11 +115,14 @@ class _HomePageState extends State<HomePage> {
           SizedBox(width: 16),
         ],
       ),
+
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
         padding: EdgeInsets.symmetric(
-            horizontal: isWide ? 100 : 24, vertical: 24),
+          horizontal: isWide ? 100 : 24,
+          vertical: 24,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -82,8 +135,7 @@ class _HomePageState extends State<HomePage> {
                   hintText: 'Find study materials',
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding:
-                  const EdgeInsets.symmetric(vertical: 18),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 18),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40),
                     borderSide: BorderSide(color: Colors.grey.shade300),
@@ -118,8 +170,7 @@ class _HomePageState extends State<HomePage> {
                   if (subjects.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content:
-                          Text('Please add a subject first.')),
+                          content: Text('Please add a subject first.')),
                     );
                     return;
                   }
@@ -134,21 +185,20 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-                  StudyCard(
-                    'Plan your days ahea',
-                    'Schedule your subjects, study time, and exams',
-                    icon: Icons.calendar_month,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const PlannerPage(),
-                        ),
-                      );
-                    },
-                  ),
-
-                  const StudyCard(
+              StudyCard(
+                'Plan your days ahead',
+                'Schedule your subjects, study time, and exams',
+                icon: Icons.calendar_month,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PlannerPage(),
+                    ),
+                  );
+                },
+              ),
+              const StudyCard(
                 'Focus study',
                 'Avoid distractions with Pomodoro timer',
                 icon: Icons.timer,
@@ -164,7 +214,6 @@ class _HomePageState extends State<HomePage> {
                 icon: Icons.mic,
               ),
             ]),
-
 
             const SizedBox(height: 36),
             const SectionTitle('Subjects'),
@@ -183,10 +232,9 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            FlashcardCreatorPage(
-                              subjectId: s['id'],
-                            ),
+                        builder: (context) => FlashcardCreatorPage(
+                          subjectId: s['id'],
+                        ),
                       ),
                     );
                   },
@@ -197,6 +245,14 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+
+      // ➕ Add Subject Button
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddSubjectDialog,
+        label: const Text("Add Subject"),
+        icon: const Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
