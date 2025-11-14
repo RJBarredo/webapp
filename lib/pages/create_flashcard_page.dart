@@ -71,9 +71,10 @@ class _FlashcardCreatorPageState extends State<FlashcardCreatorPage> {
             const SizedBox(height: 24),
             loading
                 ? const CircularProgressIndicator()
-                : ElevatedButton(
+                : ElevatedButton.icon(
+              icon: const Icon(Icons.save),
+              label: const Text('Save Flashcard'),
               onPressed: saveFlashcard,
-              child: const Text('Save Flashcard'),
             ),
           ],
         ),

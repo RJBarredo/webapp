@@ -4,7 +4,9 @@ import '../widgets/responsive_grid.dart';
 import '../widgets/section_title.dart';
 import '../services/supabase_service.dart';
 import 'package:webapp/pages/create_note_page.dart';
-import 'package:webapp/pages/create_flashcard_page.dart'; // <-- new import
+import 'package:webapp/pages/create_flashcard_page.dart';
+import 'package:webapp/pages/planner_page.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,6 +35,7 @@ class _HomePageState extends State<HomePage> {
       });
     } catch (e) {
       debugPrint('Error loading subjects: $e');
+      setState(() => loading = false);
     }
   }
 
@@ -65,11 +68,12 @@ class _HomePageState extends State<HomePage> {
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: isWide ? 100 : 24, vertical: 24),
+        padding: EdgeInsets.symmetric(
+            horizontal: isWide ? 100 : 24, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search bar
+            // 🔍 Search bar
             SizedBox(
               width: isWide ? 600 : double.infinity,
               child: TextField(
@@ -78,7 +82,8 @@ class _HomePageState extends State<HomePage> {
                   hintText: 'Find study materials',
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 18),
+                  contentPadding:
+                  const EdgeInsets.symmetric(vertical: 18),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40),
                     borderSide: BorderSide(color: Colors.grey.shade300),
@@ -88,10 +93,7 @@ class _HomePageState extends State<HomePage> {
             ),
 
             const SizedBox(height: 36),
-
-            // Section: Start Being a Model Student
             const SectionTitle('Start Being a Model Student'),
-
             const SizedBox(height: 12),
 
             ResponsiveGrid(children: [
@@ -102,7 +104,9 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NotesCreatorPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const NotesCreatorPage(),
+                    ),
                   );
                 },
               ),
@@ -111,18 +115,40 @@ class _HomePageState extends State<HomePage> {
                 'Manually or with the help of AI',
                 icon: Icons.style,
                 onTap: () {
+                  if (subjects.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content:
+                          Text('Please add a subject first.')),
+                    );
+                    return;
+                  }
+
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const FlashcardCreatorPage()),
+                    MaterialPageRoute(
+                      builder: (context) => FlashcardCreatorPage(
+                        subjectId: subjects.first['id'],
+                      ),
+                    ),
                   );
                 },
               ),
-              const StudyCard(
-                'Plan your days ahead',
-                'Schedule your subjects, study time, and exams',
-                icon: Icons.calendar_month,
-              ),
-              const StudyCard(
+                  StudyCard(
+                    'Plan your days ahead',
+                    'Schedule your subjects, study time, and exams',
+                    icon: Icons.calendar_month,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PlannerPage(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const StudyCard(
                 'Focus study',
                 'Avoid distractions with Pomodoro timer',
                 icon: Icons.timer,
@@ -139,9 +165,8 @@ class _HomePageState extends State<HomePage> {
               ),
             ]),
 
-            const SizedBox(height: 36),
 
-            // Subjects Section
+            const SizedBox(height: 36),
             const SectionTitle('Subjects'),
             const SizedBox(height: 12),
 
@@ -155,7 +180,15 @@ class _HomePageState extends State<HomePage> {
                   s['description'] ?? '',
                   icon: Icons.book,
                   onTap: () {
-                    // Optional: open subject-specific flashcards/notes later
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            FlashcardCreatorPage(
+                              subjectId: s['id'],
+                            ),
+                      ),
+                    );
                   },
                 ),
               )
