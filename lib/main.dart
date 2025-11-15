@@ -8,7 +8,6 @@ import 'pages/home_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ Initialize Supabase before running the app
   await Supabase.initialize(
     url: supabaseUrl,
     anonKey: supabaseAnonKey,
@@ -30,7 +29,7 @@ class TuonApp extends StatelessWidget {
         textTheme: GoogleFonts.poppinsTextTheme(),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
       ),
-      // 🏠 Home page of the app
+
       home: const HomePage(),
 
       // Optional: You could add a navigatorKey or routes here for future pages

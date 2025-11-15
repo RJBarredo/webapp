@@ -4,8 +4,7 @@ class StudyCard extends StatefulWidget {
   final String title;
   final String description;
 
-  // ✅ NEW: Icon parameter (optional)
-  // If null → a placeholder icon will be shown.
+
   final IconData? icon;
 
   final VoidCallback? onTap;
@@ -14,7 +13,7 @@ class StudyCard extends StatefulWidget {
       this.title,
       this.description, {
         super.key,
-        this.icon, // optional parameter
+        this.icon,
         this.onTap,
       });
 
@@ -39,7 +38,7 @@ class _StudyCardState extends State<StudyCard> {
         width: isWide ? 240 : double.infinity,
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: Colors.grey[200], // ✅ Light gray background (matches screenshot)
+          color: Colors.grey[200],
           borderRadius: BorderRadius.circular(18),
           boxShadow: hovering
               ? [
@@ -57,8 +56,7 @@ class _StudyCardState extends State<StudyCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ✅ Icon Placeholder Section
-              // You can replace this icon later by passing icon: Icons.yourChoice
+
               Icon(
                 widget.icon ?? Icons.circle, // Default placeholder icon
                 size: 32,
@@ -67,11 +65,11 @@ class _StudyCardState extends State<StudyCard> {
 
               const SizedBox(height: 14),
 
-              // ✅ Title
+
               Text(
                 widget.title,
                 style: const TextStyle(
-                  fontWeight: FontWeight.w800, // Bolder like UI screenshot
+                  fontWeight: FontWeight.w800,
                   fontSize: 20,
                   color: Colors.black,
                 ),
@@ -79,7 +77,7 @@ class _StudyCardState extends State<StudyCard> {
 
               const SizedBox(height: 8),
 
-              // ✅ Description
+
               Text(
                 widget.description,
                 style: TextStyle(

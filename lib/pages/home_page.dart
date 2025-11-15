@@ -16,7 +16,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final SupabaseService _supabase = SupabaseService();
+
   List<Map<String, dynamic>> subjects = [];
+  List<Map<String, dynamic>> filteredSubjects = [];
+
   bool loading = true;
 
   @override
@@ -30,12 +33,26 @@ class _HomePageState extends State<HomePage> {
       final data = await _supabase.fetchSubjects();
       setState(() {
         subjects = data;
+        filteredSubjects = data; // initial display
         loading = false;
       });
     } catch (e) {
       debugPrint('Error loading subjects: $e');
       setState(() => loading = false);
     }
+  }
+
+  void _filterSubjects(String query) {
+    final lower = query.toLowerCase();
+
+    setState(() {
+      filteredSubjects = subjects.where((subject) {
+        final name = subject["name"].toString().toLowerCase();
+        final desc = (subject["description"] ?? "").toString().toLowerCase();
+
+        return name.contains(lower) || desc.contains(lower);
+      }).toList();
+    });
   }
 
   Future<void> _showAddSubjectDialog() async {
@@ -76,7 +93,7 @@ class _HomePageState extends State<HomePage> {
                   );
 
                   Navigator.pop(context);
-                  _loadSubjects(); // refresh UI
+                  _loadSubjects();
                 } catch (e) {
                   debugPrint("Error adding subject: $e");
                 }
@@ -126,19 +143,22 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔍 Search bar
+            // 🔍 SEARCH BAR (Now Functional!)
             SizedBox(
               width: isWide ? 600 : double.infinity,
               child: TextField(
+                onChanged: _filterSubjects,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search, size: 26),
-                  hintText: 'Find study materials',
+                  hintText: 'Find study materials or subjects...',
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 18),
+                  contentPadding:
+                  const EdgeInsets.symmetric(vertical: 18),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide:
+                    BorderSide(color: Colors.grey.shade300),
                   ),
                 ),
               ),
@@ -148,6 +168,7 @@ class _HomePageState extends State<HomePage> {
             const SectionTitle('Start Being a Model Student'),
             const SizedBox(height: 12),
 
+            // CARDS
             ResponsiveGrid(children: [
               StudyCard(
                 'Create notes',
@@ -170,7 +191,8 @@ class _HomePageState extends State<HomePage> {
                   if (subjects.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('Please add a subject first.')),
+                          content:
+                          Text('Please add a subject first.')),
                     );
                     return;
                   }
@@ -187,7 +209,7 @@ class _HomePageState extends State<HomePage> {
               ),
               StudyCard(
                 'Plan your days ahead',
-                'Schedule your subjects, study time, and exams',
+                'Schedule subjects, study time, and exams',
                 icon: Icons.calendar_month,
                 onTap: () {
                   Navigator.push(
@@ -219,10 +241,11 @@ class _HomePageState extends State<HomePage> {
             const SectionTitle('Subjects'),
             const SizedBox(height: 12),
 
+            // SUBJECT LIST (filtered)
             ResponsiveGrid(
-              children: subjects.isEmpty
-                  ? [const Center(child: Text('No subjects yet.'))]
-                  : subjects
+              children: filteredSubjects.isEmpty
+                  ? [const Text("No subjects found.")]
+                  : filteredSubjects
                   .map(
                     (s) => StudyCard(
                   s['name'],
@@ -232,9 +255,10 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => FlashcardCreatorPage(
-                          subjectId: s['id'],
-                        ),
+                        builder: (context) =>
+                            FlashcardCreatorPage(
+                              subjectId: s['id'],
+                            ),
                       ),
                     );
                   },
@@ -246,7 +270,6 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      // ➕ Add Subject Button
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddSubjectDialog,
         label: const Text("Add Subject"),
