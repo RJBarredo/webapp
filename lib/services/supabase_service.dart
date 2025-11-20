@@ -3,9 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseService {
   final SupabaseClient client = Supabase.instance.client;
 
-  // ============================
-  // SUBJECTS
-  // ============================
 
   Future<List<Map<String, dynamic>>> fetchSubjects() async {
     final data = await client.from('subject').select();
@@ -14,14 +11,13 @@ class SupabaseService {
 
   Future<Map<String, dynamic>> addSubject(String name, String desc) async {
     try {
-      // Insert + return created row
       final data = await client
           .from('subject')
           .insert({
         'name': name,
         'description': desc,
       })
-          .select(); // IMPORTANT so we get the inserted row back
+          .select();
 
       return Map<String, dynamic>.from(data.first);
     } catch (e) {
@@ -29,9 +25,7 @@ class SupabaseService {
     }
   }
 
-  // ============================
-  // NOTES
-  // ============================
+
 
   Future<void> addNote(String title, String content, {bool isAI = false}) async {
     try {
@@ -54,10 +48,7 @@ class SupabaseService {
     return List<Map<String, dynamic>>.from(data);
   }
 
-  // ============================
-  // FLASHCARDS
-  // ============================
-
+ //Flashcard Add
   Future<void> addFlashcard({
     required int subjectId,
     required String front,
@@ -76,6 +67,7 @@ class SupabaseService {
     }
   }
 
+  //Flashcard Retrieve
   Future<List<Map<String, dynamic>>> fetchFlashcards({int? subjectId}) async {
     var query = client.from('flashcards').select();
 
@@ -84,7 +76,27 @@ class SupabaseService {
     }
 
     final data = await query.order('created_at', ascending: false);
-
     return List<Map<String, dynamic>>.from(data);
+  }
+
+//Flashcard Delete and Update
+
+  Future<void> updateFlashcard(int id, String front, String back) async {
+    try {
+      await client.from('flashcards').update({
+        'front': front,
+        'back': back,
+      }).eq('id', id);
+    } catch (e) {
+      throw Exception("Failed to update flashcard: $e");
+    }
+  }
+
+  Future<void> deleteFlashcard(int id) async {
+    try {
+      await client.from('flashcards').delete().eq('id', id);
+    } catch (e) {
+      throw Exception("Failed to delete flashcard: $e");
+    }
   }
 }

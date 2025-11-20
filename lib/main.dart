@@ -31,12 +31,6 @@ class TuonApp extends StatelessWidget {
       ),
 
       home: const HomePage(),
-
-      // Optional: You could add a navigatorKey or routes here for future pages
-      // navigatorKey: GlobalKey<NavigatorState>(),
-      // routes: {
-      //   '/flashcards': (context) => const FlashcardCreatorPage(),
-      // },
     );
   }
 }

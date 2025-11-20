@@ -132,7 +132,6 @@ class _HomePageState extends State<HomePage> {
           SizedBox(width: 16),
         ],
       ),
-
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -143,25 +142,88 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔍 SEARCH BAR (Now Functional!)
-            SizedBox(
-              width: isWide ? 600 : double.infinity,
-              child: TextField(
-                onChanged: _filterSubjects,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search, size: 26),
-                  hintText: 'Find study materials or subjects...',
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding:
-                  const EdgeInsets.symmetric(vertical: 18),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40),
-                    borderSide:
-                    BorderSide(color: Colors.grey.shade300),
+            // 🔍 SEARCH BAR WITH NOTES & FLASHCARDS BUTTONS
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    onChanged: _filterSubjects,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search, size: 26),
+                      hintText: 'Find study materials or subjects...',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding:
+                      const EdgeInsets.symmetric(vertical: 18),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(40),
+                        borderSide:
+                        BorderSide(color: Colors.grey.shade300),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 12),
+
+                // 📒 NOTES BUTTON
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SavedNotesPage(),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(40),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    child: const Icon(Icons.note, size: 24),
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // 🃏 FLASHCARDS BUTTON
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                        const SavedFlashcardsPage(),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(40),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    child: const Icon(Icons.style, size: 24),
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 36),
@@ -191,8 +253,8 @@ class _HomePageState extends State<HomePage> {
                   if (subjects.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content:
-                          Text('Please add a subject first.')),
+                        content: Text('Please add a subject first.'),
+                      ),
                     );
                     return;
                   }
@@ -269,13 +331,98 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddSubjectDialog,
         label: const Text("Add Subject"),
         icon: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+}
+
+// Simple placeholder pages so navigation works.
+// Replace with your real implementations later.
+
+class SavedNotesPage extends StatelessWidget {
+  const SavedNotesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Saved Notes")),
+      body: const Center(
+        child: Text("Your saved notes will appear here."),
+      ),
+    );
+  }
+}
+
+class SavedFlashcardsPage extends StatefulWidget {
+  const SavedFlashcardsPage({super.key});
+
+  @override
+  State<SavedFlashcardsPage> createState() => _SavedFlashcardsPageState();
+}
+
+class _SavedFlashcardsPageState extends State<SavedFlashcardsPage> {
+  final SupabaseService _supabase = SupabaseService();
+
+  List<Map<String, dynamic>> flashcards = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFlashcards();
+  }
+
+  Future<void> _loadFlashcards() async {
+    try {
+      final data = await _supabase.fetchFlashcards();
+
+      setState(() {
+        flashcards = data;
+        loading = false;
+      });
+    } catch (e) {
+      debugPrint("Error loading flashcards: $e");
+      setState(() => loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Saved Flashcards")),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : flashcards.isEmpty
+          ? const Center(child: Text("No flashcards found."))
+          : ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: flashcards.length,
+        itemBuilder: (context, index) {
+          final card = flashcards[index];
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: ListTile(
+              title: Text(
+                card['front'],
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(card['back']),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
